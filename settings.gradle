@@ -1,0 +1,3 @@
+rootProject.name = 'kstats'
+
+include 'rest', 'frontend', 'backend'

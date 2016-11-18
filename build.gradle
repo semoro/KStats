@@ -1,0 +1,21 @@
+group 'org.jetbrains.kstats'
+version '1.0-SNAPSHOT'
+
+allprojects {
+    buildscript {
+        ext.kotlin_version = '1.0.5'
+
+        repositories {
+            mavenCentral()
+            jcenter()
+        }
+
+        dependencies {
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        }
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+}
