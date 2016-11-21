@@ -6,6 +6,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import cookies.NonPersistentCookieJar
 import okhttp3.*
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
 
 class REST(val serverUrl: String) {
 
@@ -46,5 +48,7 @@ class REST(val serverUrl: String) {
     }
 
     fun projects() = getJson("/app/rest/projects")
+    fun changesSinceChange(id: Long) = getJson("/app/rest/changes?locator=sinceChange:$id,count:5000")
 
+    val dateFormatter = DateTimeFormatterBuilder().appendPattern("yyyyMMdd").appendLiteral("T").appendPattern("HHmmss").appendOffset("+HHMM", "GMT").toFormatter()
 }
