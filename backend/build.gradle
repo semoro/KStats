@@ -1,5 +1,20 @@
 apply plugin: "kotlin"
 
+repositories {
+    maven { url "http://dl.bintray.com/kotlin/ktor" }
+    maven { url "http://dl.bintray.com/kotlin/squash" }
+}
+
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile project(path: ':frontend', configuration: 'web')
+    compile project(":rest")
+
+    compile "org.jetbrains.ktor:ktor-core:0.2.3"
+    compile "org.jetbrains.ktor:ktor-netty:0.2.3"
+
+    compile "org.jetbrains.squash:squash-core:0.2.1"
+    compile "org.jetbrains.squash:squash-h2:0.2.1"
 }

@@ -1,1 +1,120 @@
 apply plugin: "kotlin2js"
+
+
+repositories {
+    maven {
+        url "http://dl.bintray.com/kotlin/kotlinx.html"
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
+    compile 'org.jetbrains.kotlinx:kotlinx.html.js:latest-1.1.0-dev-4795-104'
+}
+
+compileKotlin2Js {
+    kotlinOptions.outputFile = "${buildDir}/web/js/app.js"
+}
+
+
+build.doLast {
+    configurations.compile.each { File file ->
+        copy {
+            includeEmptyDirs = false
+
+            from zipTree(file.absolutePath)
+            into "${buildDir}/web/js/lib"
+            include { fileTreeElement ->
+                def path = fileTreeElement.path
+                path.endsWith(".js") && (path.startsWith("META-INF/resources/") || !path.startsWith("META-INF/"))
+            }
+        }
+    }
+}
+
+
+apply plugin: 'com.craigburke.client-dependencies'
+
+
+clientDependencies {
+    npm {
+        'materialize-css'('0.97.8')
+        'd3'('4.3.0')
+    }
+    installDir = "${buildDir}/assets"
+}
+
+task mergeStyles << {
+
+    copy {
+        from "${buildDir}/client-cache/npm/materialize-css/"
+        include "**/sass/**/*.scss"
+        exclude "**/ghpages-materialize.scss"
+        exclude "**/style.scss"
+        into "${buildDir}/tmp/sass"
+        eachFile { it.path = it.path.replaceFirst(".*/sass/", "") }
+    }
+
+    copy {
+        from "src/main/sass"
+        into "${buildDir}/tmp/sass"
+    }
+}
+
+mergeStyles.dependsOn clientInstall
+
+apply plugin: "com.github.robfletcher.compass"
+
+compass {
+    sassDir = file("build/tmp/sass")
+    cssDir = file("build/web/css")
+}
+
+compassCompile.dependsOn mergeStyles
+
+
+task copyAssets << {
+    def assets = "${buildDir}/assets"
+    def target = "${buildDir}/web"
+
+    copy {
+        from "$assets/materialize-css/js"
+        from "$assets/jquery/"
+        into "$target/js/lib/"
+    }
+
+    copy {
+        from "$assets/materialize-css/fonts"
+        into "$target/fonts"
+    }
+
+    copy {
+        from "${projectDir}/src/main/html"
+        into "$target/"
+    }
+}
+
+copyAssets.dependsOn clientInstall
+
+task dist(type: Jar) {
+    classifier 'web'
+    from "${buildDir}"
+    include "web/**"
+}
+
+dist.dependsOn compassCompile
+dist.dependsOn copyAssets
+
+configurations {
+    web
+}
+
+
+artifacts {
+    web dist
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
+
