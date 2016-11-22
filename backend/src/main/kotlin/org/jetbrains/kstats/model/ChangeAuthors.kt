@@ -13,7 +13,7 @@ import org.jetbrains.squash.statements.values
 object ChangeAuthors : TableDefinition() {
     val id = integer("id").primaryKey().autoIncrement()
     val displayName = text("display_name")
-    val username = text("username").uniqueIndex()
+    val username = text("username")
     val tcid = long("tcid").uniqueIndex() // TeamCity author id TODO: Separate relation table
 
     fun create(dto: AuthorDTO) = withThreadLocalTransaction {

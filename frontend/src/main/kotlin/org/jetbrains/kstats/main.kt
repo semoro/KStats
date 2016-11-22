@@ -17,6 +17,14 @@ object TitleManager {
         }
 }
 
+private val postInitTasks = mutableListOf<() -> Unit>()
+private fun postInit() {
+    postInitTasks.forEach { it.invoke() }
+}
+
+fun postInit(task: () -> Unit) {
+    postInitTasks.add(task)
+}
 
 fun init() {
     val attachRoot = document.getElementById("attach-root")!!
@@ -25,6 +33,7 @@ fun init() {
         dashboard()
     }
     attachRoot.replaceWith(element)
+    postInit()
 }
 
 

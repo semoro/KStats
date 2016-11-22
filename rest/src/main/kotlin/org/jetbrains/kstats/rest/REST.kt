@@ -1,12 +1,11 @@
 package org.jetbrains.kstats.rest
 
-import com.google.gson.Gson
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import cookies.NonPersistentCookieJar
-import okhttp3.*
-import java.time.format.DateTimeFormatter
+import okhttp3.Credentials
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.time.format.DateTimeFormatterBuilder
 
 class REST(val serverUrl: String) {
@@ -28,11 +27,13 @@ class REST(val serverUrl: String) {
     fun auth(user: String, password: String) {
         val request = rb("/httpAuth/app/rest/builds").get().header("Authorization", Credentials.basic(user, password)).build()
         val response = client.newCall(request).execute()
-        when (response.code()) {
-            401 -> throw ExceptionInInitializerError("Invalid user/password")
-            else -> {
-                if (!response.isSuccessful)
-                    throw ExceptionInInitializerError("Could not connect")
+        response.use {
+            when (response.code()) {
+                401 -> throw ExceptionInInitializerError("Invalid user/password")
+                else -> {
+                    if (!response.isSuccessful)
+                        throw ExceptionInInitializerError("Could not connect")
+                }
             }
         }
     }
@@ -40,11 +41,13 @@ class REST(val serverUrl: String) {
     fun guestAuth() {
         val request = rb("/guestAuth/app/rest/builds").get().build()
         val response = client.newCall(request).execute()
-        when (response.code()) {
-            401 -> throw ExceptionInInitializerError("No guest access")
-            else -> {
-                if (!response.isSuccessful)
-                    throw ExceptionInInitializerError("Could not connect")
+        response.use {
+            when (response.code()) {
+                401 -> throw ExceptionInInitializerError("No guest access")
+                else -> {
+                    if (!response.isSuccessful)
+                        throw ExceptionInInitializerError("Could not connect")
+                }
             }
         }
     }
@@ -53,15 +56,17 @@ class REST(val serverUrl: String) {
     fun getJson(path: String): JsonElement {
         val request = rb(path).build()
         val response = client.newCall(request).execute()
-        if (response.isSuccessful)
-            return jsonParser.parse(response.body().charStream())
-        else
-            throw RuntimeException("Accessing to $path returned error code: ${response.code()}\n with message: ${response.body().string()}")
+        return response.use {
+            if (response.isSuccessful)
+                jsonParser.parse(response.body().charStream())
+            else
+                throw RuntimeException("Accessing to $path returned error code: ${response.code()}\n with message: ${response.body().string()}")
+        }
     }
 
     fun projects() = getJson("/app/rest/projects")
     fun changesSinceChange(id: Long) = getJson("/app/rest/changes?locator=sinceChange:$id,count:100")
-    fun detailedChangeById(id: Long) = getJson("/app/rest/changes/id:$id")
+    fun detailedChangeById(id: Long) = getJson("/app/rest/changes/$id")
 
     val dateFormatter = DateTimeFormatterBuilder().appendPattern("yyyyMMdd").appendLiteral("T").appendPattern("HHmmss").appendOffset("+HHMM", "GMT").toFormatter()
 }

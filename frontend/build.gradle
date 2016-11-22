@@ -39,7 +39,7 @@ apply plugin: 'com.craigburke.client-dependencies'
 clientDependencies {
     npm {
         'materialize-css'('0.97.8')
-        'd3'('4.3.0')
+        'd3'('3.5.17')
     }
     installDir = "${buildDir}/assets"
 }
@@ -80,6 +80,12 @@ task copyAssets << {
     copy {
         from "$assets/materialize-css/js"
         from "$assets/jquery/"
+        into "$target/js/lib/"
+    }
+
+    copy {
+        from "$assets/d3/"
+        include "d3.js"
         into "$target/js/lib/"
     }
 

@@ -1,9 +1,12 @@
 package org.jetbrains.kstats.model
 
 import org.jetbrains.kstats.cron.withThreadLocalTransaction
+import org.jetbrains.kstats.cron.withTransaction
 import org.jetbrains.squash.definition.*
+import org.jetbrains.squash.expressions.*
 import org.jetbrains.squash.query.orderBy
 import org.jetbrains.squash.query.select
+import org.jetbrains.squash.query.where
 import org.jetbrains.squash.results.get
 import org.jetbrains.squash.statements.fetch
 import org.jetbrains.squash.statements.insertInto
@@ -26,6 +29,22 @@ object ChangesCache : TableDefinition() {
             it[files] = change.files
             it[kotlinFiles] = change.kotlinFiles
         }.fetch(id).execute()
+    }
+
+    fun countChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
+        return@withTransaction select { id.count() }
+                .where { (date gteq range.start) and (date lteq literal(range.endInclusive)) }
+                .execute().first().get<Int>(0)
+    }
+
+    fun countKotlinChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
+        return@withTransaction select { id.count() }
+                .where {
+                    (date gteq range.start) and
+                            (date lteq literal(range.endInclusive)) and
+                            (kotlinFiles gt 0)
+                }
+                .execute().first().get<Int>(0)
     }
 
 }
