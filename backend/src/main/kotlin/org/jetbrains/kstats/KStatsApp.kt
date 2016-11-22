@@ -1,5 +1,6 @@
 package org.jetbrains.kstats
 
+import org.jetbrains.kstats.cron.Cron
 import org.jetbrains.kstats.model.ChangeAuthors
 import org.jetbrains.kstats.model.ChangesCache
 import org.jetbrains.ktor.application.Application
@@ -36,14 +37,13 @@ fun Route.index() {
 
 val db = H2Connection.create("jdbc:h2:file:./db")
 
-class KStatsApp {
+class KStatsApp : AutoCloseable {
+    override fun close() {
+        Cron.stop()
+    }
 
     fun Application.install() {
-        with(db.createTransaction()){
-            databaseSchema().create(listOf(ChangesCache, ChangeAuthors))
-            commit()
-        }
-
+        Cron.start()
 
         install(DefaultHeaders)
         install(CallLogging)
@@ -56,5 +56,6 @@ class KStatsApp {
             index()
         }
     }
+
 
 }

@@ -37,6 +37,18 @@ class REST(val serverUrl: String) {
         }
     }
 
+    fun guestAuth() {
+        val request = rb("/guestAuth/app/rest/builds").get().build()
+        val response = client.newCall(request).execute()
+        when (response.code()) {
+            401 -> throw ExceptionInInitializerError("No guest access")
+            else -> {
+                if (!response.isSuccessful)
+                    throw ExceptionInInitializerError("Could not connect")
+            }
+        }
+    }
+
 
     fun getJson(path: String): JsonElement {
         val request = rb(path).build()
@@ -48,7 +60,8 @@ class REST(val serverUrl: String) {
     }
 
     fun projects() = getJson("/app/rest/projects")
-    fun changesSinceChange(id: Long) = getJson("/app/rest/changes?locator=sinceChange:$id,count:5000")
+    fun changesSinceChange(id: Long) = getJson("/app/rest/changes?locator=sinceChange:$id,count:100")
+    fun detailedChangeById(id: Long) = getJson("/app/rest/changes/id:$id")
 
     val dateFormatter = DateTimeFormatterBuilder().appendPattern("yyyyMMdd").appendLiteral("T").appendPattern("HHmmss").appendOffset("+HHMM", "GMT").toFormatter()
 }
