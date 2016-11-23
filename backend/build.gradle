@@ -13,7 +13,7 @@ dependencies {
     compile project(":rest")
 
     compile "org.jetbrains.ktor:ktor-core:0.2.3"
-    compile "org.jetbrains.ktor:ktor-netty:0.2.3"
+    compile "org.jetbrains.ktor:ktor-jetty:0.2.3"
 
     compile "org.jetbrains.squash:squash-core:0.2.1"
     compile "org.jetbrains.squash:squash-h2:0.2.1"

@@ -30,8 +30,8 @@ class TeamCityCrawler(val client: REST) {
 
         val date = LocalDateTime.parse(change["date"].string, client.dateFormatter)
         val author = detailedChange.get("user")?.let { user ->
-            detailedChange.get("id")?.let { id ->
-                AuthorDTO(user["name"].string, user["username"].string, id.long).apply { ChangeAuthors.createIfNotExist(this) }
+            user.obj.get("id")?.let { id ->
+                AuthorDTO(user.obj.get("name").nullString ?: user["username"].string, user["username"].string, id.long).apply { ChangeAuthors.createIfNotExist(this) }
             }
         }
         val files = detailedChange["files"].obj
@@ -50,6 +50,9 @@ class TeamCityCrawler(val client: REST) {
             return
         }
         changes.forEach(this::processShortChange)
+        changesResponse.obj.get("nextHref").nullString?.let {
+            processChanges(client.nextHref(it))
+        }
     }
 
     fun queryChanges() {

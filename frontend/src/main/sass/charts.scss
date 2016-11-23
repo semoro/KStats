@@ -1,0 +1,18 @@
+div#kotlinCommitsVsAll {
+  svg {
+    path {
+      fill: none;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: grey;
+      stroke-width: 1;
+      shape-rendering: auto;
+    }
+
+    .axis.y .tick {
+      stroke-opacity: 0.4;
+    }
+  }
+}

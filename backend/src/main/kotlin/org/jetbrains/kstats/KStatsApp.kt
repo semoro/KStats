@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonWriter
 import org.jetbrains.kstats.cron.Cron
 import org.jetbrains.kstats.model.ChangeAuthors
 import org.jetbrains.kstats.model.ChangesCache
+import org.jetbrains.kstats.query.formatForJS
 import org.jetbrains.kstats.query.kotlinCommitsVsAllPerDay
 import org.jetbrains.ktor.application.*
 import org.jetbrains.ktor.content.resolveClasspathResource
@@ -21,7 +22,9 @@ import org.jetbrains.ktor.routing.Routing
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.squash.dialects.h2.H2Connection
+import java.time.Clock
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 fun Route.staticFolder(base: String) {
@@ -45,11 +48,12 @@ fun Route.index() {
 val gson = Gson()
 
 fun Route.api() {
+
     route("/api") {
         get("kotlinCommitsVsAll") {
             val now = LocalDate.now()
             val jsonArray = kotlinCommitsVsAllPerDay(now.minusDays(7)..now).map { (date, all, kotlin) ->
-                jsonObject("date" to date.format(DateTimeFormatter.ISO_DATE), "all" to all, "kotlin" to kotlin)
+                jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
             }.toJsonArray()
             call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
         }
@@ -70,6 +74,7 @@ class KStatsApp : AutoCloseable {
         install(CallLogging)
         install(Routing) {
             staticFolder("/css")
+            staticFolder("/img")
             staticFolder("/js")
             staticFolder("/js/lib")
             staticFolder("/fonts")

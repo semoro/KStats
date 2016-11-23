@@ -31,20 +31,11 @@ object ChangesCache : TableDefinition() {
         }.fetch(id).execute()
     }
 
-    fun countChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
-        return@withTransaction select { id.count() }
-                .where { (date gteq range.start) and (date lteq literal(range.endInclusive)) }
-                .execute().first().get<Int>(0)
-    }
-
-    fun countKotlinChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
-        return@withTransaction select { id.count() }
-                .where {
-                    (date gteq range.start) and
-                            (date lteq literal(range.endInclusive)) and
-                            (kotlinFiles gt 0)
-                }
-                .execute().first().get<Int>(0)
+    fun getChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
+        val changes = where { (date gteq range.start) and (date lteq literal(range.endInclusive)) }
+                .select(ChangesCache)
+                .execute()
+        return@withTransaction changes.map { ChangeDTO(null, it[date], it[files], it[kotlinFiles], it[id]) }.toList() //TODO: Author fetch
     }
 
 }
@@ -65,7 +56,7 @@ object TeamCityChangeRelation : TableDefinition() {
     }
 
     fun findLatestChangeTCID() = withThreadLocalTransaction {
-        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid) ?: -1
+        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid) ?: 3149806
     }
 }
 

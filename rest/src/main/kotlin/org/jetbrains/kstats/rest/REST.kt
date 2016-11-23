@@ -68,5 +68,7 @@ class REST(val serverUrl: String) {
     fun changesSinceChange(id: Long) = getJson("/app/rest/changes?locator=sinceChange:$id,count:100")
     fun detailedChangeById(id: Long) = getJson("/app/rest/changes/$id")
 
+    fun nextHref(next: String) = getJson(next)
+
     val dateFormatter = DateTimeFormatterBuilder().appendPattern("yyyyMMdd").appendLiteral("T").appendPattern("HHmmss").appendOffset("+HHMM", "GMT").toFormatter()
 }

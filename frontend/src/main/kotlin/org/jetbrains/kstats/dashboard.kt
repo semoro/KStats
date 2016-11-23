@@ -32,7 +32,14 @@ fun FlowContent.dashboard() {
 fun FlowContent.navbar() {
     nav {
         div("nav-wrapper") {
-            a("/", "brand-logo") { +"Kotlin Internal Usage Statistics" }
+            div("row") {
+                div("col s12") {
+                    a("/", classes = "brand-logo") {
+                        img { src = "/img/logo.png" }
+                        +"Internal Usage Statistics"
+                    }
+                }
+            }
         }
     }
 }
