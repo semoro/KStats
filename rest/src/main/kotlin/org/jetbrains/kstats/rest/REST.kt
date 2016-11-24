@@ -6,14 +6,25 @@ import cookies.NonPersistentCookieJar
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import ssl.TrustUtil
+import java.io.File
 import java.time.format.DateTimeFormatterBuilder
+import java.util.concurrent.TimeUnit
+import javax.net.ssl.X509TrustManager
 
-class REST(val serverUrl: String) {
+
+class REST(val serverUrl: String, certificates: List<File>) {
 
     private val client: OkHttpClient
 
     init {
         val builder = OkHttpClient.Builder()
+        if (certificates.isNotEmpty()) {
+            val trustUtil = TrustUtil(certificates.toTypedArray())
+            trustUtil.init()
+            builder.sslSocketFactory(trustUtil.sslContext.socketFactory, trustUtil.trustManagers[0] as X509TrustManager)
+        }
+        builder.readTimeout(1, TimeUnit.MINUTES)
         builder.cookieJar(NonPersistentCookieJar())
         client = builder.build()
     }

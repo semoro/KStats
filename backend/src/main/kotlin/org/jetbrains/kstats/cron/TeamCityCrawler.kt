@@ -3,6 +3,8 @@ package org.jetbrains.kstats.cron
 import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
 import org.jetbrains.kstats.model.*
+import org.jetbrains.kstats.model.TeamCityChangeRelation.findChangeID
+import org.jetbrains.kstats.model.TeamCityChangeRelation.findChangeIDs
 import org.jetbrains.kstats.model.TeamCityChangeRelation.findLatestChangeTCID
 
 import org.jetbrains.kstats.rest.REST
@@ -12,16 +14,14 @@ import kotlin.system.measureTimeMillis
 class TeamCityCrawler(val client: REST) {
 
     var processedChanges = 0
+    var uniqueChanges = 0
     fun doWork() {
         try {
             println("TeamCity crawler started")
             val time = measureTimeMillis {
-                withThreadLocalTransaction {
                 queryChanges()
-                commit()
-                }
             }
-            println("TeamCity crawler processed $processedChanges in ${time / 1000}s")
+            println("TeamCity crawler processed $processedChanges changes, $uniqueChanges unique changes in ${time / 1000}s")
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -31,9 +31,24 @@ class TeamCityCrawler(val client: REST) {
     val skippedChangeTypes = listOf("deleted", "moved")
 
     fun processShortChange(change: JsonElement) {
+        processedChanges++
         val tcid = change["id"].long
+        val version = change["version"].string
+
+        val duplicateCandidates = findChangeIDs(version)
+
+        duplicateCandidates.singleOrNull()?.let { duplicate ->
+            return TeamCityChangeRelation.addRelation(duplicate, tcid)
+        }
+
         val detailedChange = client.detailedChangeById(tcid).obj
         println(detailedChange)
+        val vcsId = detailedChange["vcsRootInstance"]["id"].long
+        if (duplicateCandidates.isNotEmpty()) {
+            findChangeID(version, vcsId)?.let { duplicate ->
+                return TeamCityChangeRelation.addRelation(duplicate, tcid)
+            }
+        }
 
         val date = LocalDateTime.parse(change["date"].string, client.dateFormatter)
         val author = detailedChange.get("user")?.let { user ->
@@ -48,8 +63,9 @@ class TeamCityCrawler(val client: REST) {
                 .map { it["file"].string }.filter { it.endsWith(".kt", true) || it.endsWith(".kts", true) }.count()
         ChangeDTO(author, date, fileCount, kotlinFileCount).apply {
             ChangesCache.create(this)
-            TeamCityChangeRelation.addRelation(this.id!!, tcid)
+            TeamCityChangeRelation.addUniqueChange(this.id!!, tcid, version, vcsId)
         }
+        uniqueChanges++
     }
 
     fun processChanges(changesResponse: JsonElement) {
@@ -57,7 +73,12 @@ class TeamCityCrawler(val client: REST) {
         if (changes == null || changes.size() == 0) {
             return
         }
-        changes.forEach(this::processShortChange)
+
+        withThreadLocalTransaction {
+            changes.forEach(this@TeamCityCrawler::processShortChange)
+            commit()
+        }
+
         changesResponse.obj.get("nextHref").nullString?.let {
             processChanges(client.nextHref(it))
         }

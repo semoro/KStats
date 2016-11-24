@@ -31,21 +31,21 @@ object ChangesCache : TableDefinition() {
         }.fetch(id).execute()
     }
 
-    fun getChangesInTimeRange(range: ClosedRange<LocalDateTime>) = withTransaction {
-        val changes = where { (date gteq range.start) and (date lteq literal(range.endInclusive)) }
-                .select(ChangesCache)
-                .execute()
-        return@withTransaction changes.map { ChangeDTO(null, it[date], it[files], it[kotlinFiles], it[id]) }.toList() //TODO: Author fetch
-    }
-
 }
 
 object TeamCityChangeRelation : TableDefinition() {
     val id = reference(ChangesCache.id)
-    val tcid = long("tcid") //TeamCity Change ID
+    val tcid = long("tcid").index() //TeamCity Change ID
+    val commitVersion = varchar("version", 128).nullable()
+    val vcsRootTcId = long("vcs_root_tcid").nullable().index()
 
-    init {
-        primaryKey(id, tcid)
+    fun addUniqueChange(_id: Int, _tcid: Long, _commitVersion: String, _vcsRootTcId: Long) = withThreadLocalTransaction {
+        insertInto(TeamCityChangeRelation).values {
+            it[id] = _id
+            it[tcid] = _tcid
+            it[commitVersion] = _commitVersion
+            it[vcsRootTcId] = _vcsRootTcId
+        }.execute()
     }
 
     fun addRelation(_id: Int, _tcid: Long) = withThreadLocalTransaction {
@@ -55,8 +55,20 @@ object TeamCityChangeRelation : TableDefinition() {
         }.execute()
     }
 
+    fun findChangeIDs(_commitVersion: String) = withThreadLocalTransaction {
+        return@withThreadLocalTransaction select { id }.where {
+            commitVersion eq _commitVersion
+        }.execute().map { it[id] }.toList()
+    }
+
+    fun findChangeID(_commitVersion: String, _vcsRootTcId: Long) = withThreadLocalTransaction {
+        return@withThreadLocalTransaction select { id }.where {
+            commitVersion eq _commitVersion and (vcsRootTcId eq _vcsRootTcId)
+        }.execute().singleOrNull()?.get(id)
+    }
+
     fun findLatestChangeTCID() = withThreadLocalTransaction {
-        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid) ?: 3149806
+        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid) ?: 7530000
     }
 }
 

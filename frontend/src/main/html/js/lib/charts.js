@@ -21,7 +21,7 @@ Charts.d3linearGradient = function (svg, h, y, id, colorA, colorB) {
         });
 };
 
-Charts.mountDateAreaChart = function (dataUrl, attachRootSelector) {
+Charts.mountDateAreaChart = function (dataUrl, attachRootSelector, legendLabels) {
     var margin = {top: 20, right: 20, bottom: 30, left: 50};
     var fullW = 500;
     var fullH = 300;
@@ -108,7 +108,7 @@ Charts.mountDateAreaChart = function (dataUrl, attachRootSelector) {
 
 
         var legend = svg.selectAll('.legend')
-            .data([{text: "All commits", color: "#8566ff"}, {text: "Kotlin commits", color: "#f58612"}])
+            .data([{text: legendLabels[0], color: "#8566ff"}, {text: legendLabels[1], color: "#f58612"}])
             .enter()
             .append('g')
             .attr('class', 'legend')

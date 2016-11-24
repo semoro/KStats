@@ -5,9 +5,15 @@ import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
 import java.io.File
 
 
+fun optionalFile(f: File): Configuration =
+        if (f.exists())
+            ConfigurationProperties.fromFile(File("kstats.properties"))
+        else
+            ConfigurationMap() //Empty config
+
 val config = systemProperties() overriding
         EnvironmentVariables() overriding
-        ConfigurationProperties.fromFile(File("kstats.properties")) overriding
+        optionalFile(File("kstats.properties")) overriding
         ConfigurationProperties.fromResource("default.properties")
 
 object Config {
@@ -16,5 +22,11 @@ object Config {
         val guest by booleanType
         val user by stringType
         val password by stringType
+        val additional_certificates by stringType
+    }
+
+    object server : PropertyGroup() {
+        val host by stringType
+        val port by intType
     }
 }
