@@ -110,6 +110,7 @@ task dist(type: Jar) {
 
 dist.dependsOn compassCompile
 dist.dependsOn copyAssets
+dist.dependsOn compileKotlin2Js
 
 configurations {
     web
@@ -123,4 +124,3 @@ artifacts {
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
 }
-
