@@ -27,6 +27,7 @@
     <orderEntry type="library" name="Gradle: org.jetbrains.ktor:ktor-jetty:0.2.3" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.squash:squash-core:0.2.1" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.squash:squash-h2:0.2.1" level="project" />
+    <orderEntry type="library" name="Gradle: com.natpryce:konfig:1.4.2.0" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-runtime:1.1-M03-eap-21" level="project" />
     <orderEntry type="library" name="Gradle: com.squareup.okhttp3:okhttp:3.4.2" level="project" />
     <orderEntry type="library" name="Gradle: com.github.salomonbrys.kotson:kotson:2.3.0" level="project" />

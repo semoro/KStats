@@ -1,6 +1,8 @@
 package org.jetbrains.kstats.model
 
 import org.jetbrains.kstats.cron.withThreadLocalTransaction
+import org.jetbrains.kstats.model.TeamCityAuthorRelation.addRelation
+import org.jetbrains.kstats.model.TeamCityAuthorRelation.findIdByTCID
 import org.jetbrains.squash.definition.*
 import org.jetbrains.squash.expressions.eq
 import org.jetbrains.squash.query.select
@@ -14,24 +16,43 @@ object ChangeAuthors : TableDefinition() {
     val id = integer("id").primaryKey().autoIncrement()
     val displayName = text("display_name")
     val username = text("username")
-    val tcid = long("tcid").uniqueIndex() // TeamCity author id TODO: Separate relation table
 
     fun create(dto: AuthorDTO) = withThreadLocalTransaction {
         dto.id = insertInto(ChangeAuthors).values {
-            it[tcid] = dto.tcid
             it[displayName] = dto.displayName
             it[username] = dto.username
         }.fetch(id).execute()
     }
 
-    fun createIfNotExist(dto: AuthorDTO) = withThreadLocalTransaction {
-        select { id }.where { tcid eq dto.tcid }.execute().singleOrNull()?.let {
-            dto.id = it[id]
-        } ?: create(dto)
+    fun createIfNotExist(dto: AuthorDTO, _tcid: Long) = withThreadLocalTransaction {
+        findIdByTCID(_tcid)?.let {
+            dto.id = it
+        } ?: create(dto).apply {
+            addRelation(dto.id!!, _tcid)
+        }
+    }
+}
+
+object TeamCityAuthorRelation : TableDefinition() {
+    val id = reference(ChangeAuthors.id)
+    val tcid = long("tcid") //TeamCity Author ID
+
+    init {
+        primaryKey(id, tcid)
+    }
+
+    fun findIdByTCID(_tcid: Long) = withThreadLocalTransaction {
+        return@withThreadLocalTransaction select { id }.where { tcid eq _tcid }.execute().singleOrNull()?.let { it[id] }
+    }
+
+    fun addRelation(_id: Int, _tcid: Long) = withThreadLocalTransaction {
+        insertInto(TeamCityAuthorRelation).values {
+            it[id] = _id
+            it[tcid] = _tcid
+        }.execute()
     }
 }
 
 data class AuthorDTO(var displayName: String,
                      var username: String,
-                     var tcid: Long,
                      var id: Int? = null)

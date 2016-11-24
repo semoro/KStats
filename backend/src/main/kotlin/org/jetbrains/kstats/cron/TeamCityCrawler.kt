@@ -7,15 +7,22 @@ import org.jetbrains.kstats.model.TeamCityChangeRelation.findLatestChangeTCID
 
 import org.jetbrains.kstats.rest.REST
 import java.time.LocalDateTime
+import kotlin.system.measureTimeMillis
 
 class TeamCityCrawler(val client: REST) {
 
+    var processedChanges = 0
     fun doWork() {
         try {
-            withThreadLocalTransaction {
+            println("TeamCity crawler started")
+            val time = measureTimeMillis {
+                withThreadLocalTransaction {
                 queryChanges()
                 commit()
+                }
             }
+            println("TeamCity crawler processed $processedChanges in ${time / 1000}s")
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -31,7 +38,8 @@ class TeamCityCrawler(val client: REST) {
         val date = LocalDateTime.parse(change["date"].string, client.dateFormatter)
         val author = detailedChange.get("user")?.let { user ->
             user.obj.get("id")?.let { id ->
-                AuthorDTO(user.obj.get("name").nullString ?: user["username"].string, user["username"].string, id.long).apply { ChangeAuthors.createIfNotExist(this) }
+                AuthorDTO(user.obj.get("name").nullString ?: user["username"].string, user["username"].string)
+                        .apply { ChangeAuthors.createIfNotExist(this, id.long) }
             }
         }
         val files = detailedChange["files"].obj

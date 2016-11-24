@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonWriter
 import org.jetbrains.kstats.cron.Cron
 import org.jetbrains.kstats.model.ChangeAuthors
 import org.jetbrains.kstats.model.ChangesCache
+import org.jetbrains.kstats.model.DBInitializer
 import org.jetbrains.kstats.query.formatForJS
 import org.jetbrains.kstats.query.kotlinCommitAuthorsPerDay
 import org.jetbrains.kstats.query.kotlinCommitsVsAllPerDay
@@ -23,10 +24,13 @@ import org.jetbrains.ktor.routing.Routing
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.squash.dialects.h2.H2Connection
+import java.io.File
+import java.io.FileReader
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 fun Route.staticFolder(base: String) {
     route(base) {
@@ -70,12 +74,15 @@ fun Route.api() {
 
 val db = H2Connection.create("jdbc:h2:file:./db")
 
+
 class KStatsApp : AutoCloseable {
     override fun close() {
         Cron.stop()
+        db.close()
     }
 
     fun Application.install() {
+        DBInitializer.initializeDataBase()
         Cron.start()
 
         install(DefaultHeaders)
