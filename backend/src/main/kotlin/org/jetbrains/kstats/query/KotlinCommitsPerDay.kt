@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.OffsetTime
 import java.time.format.DateTimeFormatter
 
-data class CommitsPerDayResult(val date: LocalDate, val all: Int, val kotlin: Int)
+data class QueryPerDayResult(val date: LocalDate, val all: Int, val kotlin: Int)
 
 fun Name.toSQL() = db.dialect.nameSQL(this)
 
@@ -27,6 +27,6 @@ fun kotlinCommitsVsAllPerDay(range: ClosedRange<LocalDate>) = withTransaction {
                 WHERE $date > '$start' AND $date <= '$end'
                 GROUP BY DATEM
                 ORDER BY DATEM""".trimIndent())
-            .map { CommitsPerDayResult(parseDBDate(it[0]), it[1], it[2]) }
+            .map { QueryPerDayResult(parseDBDate(it[0]), it[1], it[2]) }
             .toList()
 }

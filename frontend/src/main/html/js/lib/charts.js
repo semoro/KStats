@@ -1,7 +1,7 @@
-var charts = {}
+var Charts = {};
 
 
-charts.d3linearGradient = function (svg, h, y, id, colorA, colorB) {
+Charts.d3linearGradient = function (svg, h, y, id, colorA, colorB) {
     svg.append("linearGradient")
         .attr("id", id)
         .attr("gradientUnits", "userSpaceOnUse")
@@ -21,7 +21,7 @@ charts.d3linearGradient = function (svg, h, y, id, colorA, colorB) {
         });
 };
 
-function dateAreaChart() {
+Charts.mountDateAreaChart = function (dataUrl, attachRootSelector) {
     var margin = {top: 20, right: 20, bottom: 30, left: 50};
     var fullW = 500;
     var fullH = 300;
@@ -54,7 +54,7 @@ function dateAreaChart() {
             return y(data.kotlin)
         });
 
-    var svg = d3.select("#kotlinCommitsVsAll").append("svg")
+    var svg = d3.select(attachRootSelector).append("svg")
         .attr("width", "100%")
         //.attr("height", h)
         .attr("viewBox", "0 0 " + (fullW + margin.right) + " " + fullH)
@@ -62,10 +62,10 @@ function dateAreaChart() {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    charts.d3linearGradient(svg, 1, y, "all-gradient", "#00c8ff", "#8767ff");
-    charts.d3linearGradient(svg, 1, y, "kotlin-gradient", "#c757bc", "#f88909");
+    Charts.d3linearGradient(svg, 1, y, "all-gradient", "#00c8ff", "#8767ff");
+    Charts.d3linearGradient(svg, 1, y, "kotlin-gradient", "#c757bc", "#f88909");
 
-    d3.json("/api/kotlinCommitsVsAll", function (error, data) {
+    d3.json(dataUrl, function (error, data) {
 
         data.forEach(function (d) {
             d.date = Date.parse(d.date);
@@ -83,20 +83,14 @@ function dateAreaChart() {
             .datum(data)
             .attr("class", "all")
             .attr("d", area1)
-            .attr("style", "fill: url(#all-gradient);")
-            .attr("data-legend", function (d) {
-                return "All commits"
-            });
+            .attr("style", "fill: url(#all-gradient);");
 
 
         svg.append("path")
             .datum(data)
             .attr("class", "kotlin")
             .attr("d", area2)
-            .attr("style", "fill: url(#kotlin-gradient);")
-            .attr("data-legend", function (d) {
-                return "Kotlin commits"
-            });
+            .attr("style", "fill: url(#kotlin-gradient);");
 
         xAxis.ticks(7);
 

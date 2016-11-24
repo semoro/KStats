@@ -9,6 +9,7 @@ import org.jetbrains.kstats.cron.Cron
 import org.jetbrains.kstats.model.ChangeAuthors
 import org.jetbrains.kstats.model.ChangesCache
 import org.jetbrains.kstats.query.formatForJS
+import org.jetbrains.kstats.query.kotlinCommitAuthorsPerDay
 import org.jetbrains.kstats.query.kotlinCommitsVsAllPerDay
 import org.jetbrains.ktor.application.*
 import org.jetbrains.ktor.content.resolveClasspathResource
@@ -53,6 +54,13 @@ fun Route.api() {
         get("kotlinCommitsVsAll") {
             val now = LocalDate.now()
             val jsonArray = kotlinCommitsVsAllPerDay(now.minusDays(7)..now).map { (date, all, kotlin) ->
+                jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
+            }.toJsonArray()
+            call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
+        }
+        get("kotlinAuthorsVsAll") {
+            val now = LocalDate.now()
+            val jsonArray = kotlinCommitAuthorsPerDay(now.minusDays(7)..now).map { (date, all, kotlin) ->
                 jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
             }.toJsonArray()
             call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))

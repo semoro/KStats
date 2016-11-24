@@ -10,17 +10,20 @@ fun FlowContent.dashboard() {
     }
     div {
         div("row") {
-            div("col s12 m6") {
+            div("col s12 l6") {
                 cardPanel {
-                    div { id = "kotlinCommitsVsAll" }
+                    div(classes = "areaChart") { id = "kotlinCommitsVsAll" }
                     postInit {
-                        js("dateAreaChart()")
+                        Charts.mountDateAreaChart("/api/kotlinCommitsVsAll", "#kotlinCommitsVsAll")
                     }
                 }
             }
-            div("col s12 m6") {
+            div("col s12 l6") {
                 cardPanel {
-                    +"GRAPH HERE"
+                    div(classes = "areaChart") { id = "kotlinAuthorsVsAll" }
+                    postInit {
+                        Charts.mountDateAreaChart("/api/kotlinAuthorsVsAll", "#kotlinAuthorsVsAll")
+                    }
                 }
             }
         }
@@ -37,6 +40,11 @@ fun FlowContent.navbar() {
                     a("/", classes = "brand-logo") {
                         img { src = "/img/logo.png" }
                         +"Internal Usage Statistics"
+                    }
+                    ul(classes = "right hide-on-med-and-down") {
+                        li {
+                            materialIcon("settings")
+                        }
                     }
                 }
             }
