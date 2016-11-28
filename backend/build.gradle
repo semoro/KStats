@@ -1,5 +1,7 @@
 apply plugin: "kotlin"
 
+sourceCompatibility = 1.8
+
 repositories {
     maven { url "http://dl.bintray.com/kotlin/ktor" }
     maven { url "http://dl.bintray.com/kotlin/squash" }
@@ -19,4 +21,18 @@ dependencies {
     compile "org.jetbrains.squash:squash-h2:0.2.1"
 
     compile "com.natpryce:konfig:1.4.2.0"
+}
+
+
+apply plugin: 'application'
+
+mainClassName = 'org.jetbrains.kstats.MainKt'
+
+apply plugin: 'com.bmuschko.docker-java-application'
+
+docker {
+    javaApplication {
+        tag = "kstats:0.0.1"
+    }
+    url = 'unix:///var/run/docker.sock'
 }
