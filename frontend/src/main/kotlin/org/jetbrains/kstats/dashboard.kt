@@ -14,7 +14,7 @@ fun FlowContent.dashboard() {
                 cardPanel {
                     div(classes = "areaChart") { id = "kotlinCommitsVsAll" }
                     postInit {
-                        Charts.mountDateAreaChart("/api/kotlinCommitsVsAll",
+                        Charts.mountDateAreaChart("/api/statistics/per_day/commits?days=7",
                                 "#kotlinCommitsVsAll",
                                 arrayOf("All commits", "Kotlin commits"))
                     }
@@ -24,7 +24,7 @@ fun FlowContent.dashboard() {
                 cardPanel {
                     div(classes = "areaChart") { id = "kotlinAuthorsVsAll" }
                     postInit {
-                        Charts.mountDateAreaChart("/api/kotlinAuthorsVsAll",
+                        Charts.mountDateAreaChart("/api/statistics/per_day/commiters?days=7",
                                 "#kotlinAuthorsVsAll",
                                 arrayOf("All commiters", "Kotlin commiters"))
                     }

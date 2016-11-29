@@ -1,18 +1,15 @@
 package org.jetbrains.kstats
 
-import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJsonArray
 import com.google.gson.Gson
-import com.google.gson.stream.JsonWriter
 import org.jetbrains.kstats.cron.Cron
-import org.jetbrains.kstats.model.ChangeAuthors
-import org.jetbrains.kstats.model.ChangesCache
 import org.jetbrains.kstats.model.DBInitializer
+import org.jetbrains.kstats.query.StatisticsPerDay
 import org.jetbrains.kstats.query.formatForJS
-import org.jetbrains.kstats.query.kotlinCommitAuthorsPerDay
-import org.jetbrains.kstats.query.kotlinCommitsVsAllPerDay
-import org.jetbrains.ktor.application.*
+import org.jetbrains.ktor.application.Application
+import org.jetbrains.ktor.application.call
+import org.jetbrains.ktor.application.install
 import org.jetbrains.ktor.content.resolveClasspathResource
 import org.jetbrains.ktor.content.resolveClasspathWithPath
 import org.jetbrains.ktor.features.DefaultHeaders
@@ -24,13 +21,9 @@ import org.jetbrains.ktor.routing.Routing
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.squash.dialects.h2.H2Connection
-import java.io.File
-import java.io.FileReader
-import java.time.Clock
+import java.lang.Math.max
+import java.lang.Math.min
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 fun Route.staticFolder(base: String) {
     route(base) {
@@ -43,7 +36,6 @@ fun Route.staticFolder(base: String) {
     }
 }
 
-
 fun Route.index() {
     get("/") {
         call.respond(call.resolveClasspathWithPath("/web", "index.html")!!)
@@ -54,20 +46,27 @@ val gson = Gson()
 
 fun Route.api() {
 
+
     route("/api") {
-        get("kotlinCommitsVsAll") {
-            val now = LocalDate.now()
-            val jsonArray = kotlinCommitsVsAllPerDay(now.minusDays(7)..now).map { (date, all, kotlin) ->
-                jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
-            }.toJsonArray()
-            call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
-        }
-        get("kotlinAuthorsVsAll") {
-            val now = LocalDate.now()
-            val jsonArray = kotlinCommitAuthorsPerDay(now.minusDays(7)..now).map { (date, all, kotlin) ->
-                jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
-            }.toJsonArray()
-            call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
+        route("statistics") {
+            route("per_day") {
+                get("commits") {
+                    val days = min(subject.parameters["days"]!!.toLong(), 31)
+                    val now = LocalDate.now()
+                    val jsonArray = StatisticsPerDay.commits(now.minusDays(days)..now).map { (date, all, kotlin) ->
+                        jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
+                    }.toJsonArray()
+                    call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
+                }
+                get("commiters") {
+                    val days = min(subject.parameters["days"]!!.toLong(), 31)
+                    val now = LocalDate.now()
+                    val jsonArray = StatisticsPerDay.commiters(now.minusDays(days)..now).map { (date, all, kotlin) ->
+                        jsonObject("date" to date.formatForJS(), "all" to all, "kotlin" to kotlin)
+                    }.toJsonArray()
+                    call.respondText(ContentType.Application.Json, gson.toJson(jsonArray))
+                }
+            }
         }
     }
 }

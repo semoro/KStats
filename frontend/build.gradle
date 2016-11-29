@@ -17,7 +17,7 @@ compileKotlin2Js {
 }
 
 
-build.doLast {
+task copyKotlinJSLib << {
     configurations.compile.each { File file ->
         copy {
             includeEmptyDirs = false
@@ -111,6 +111,7 @@ task dist(type: Jar) {
 dist.dependsOn compassCompile
 dist.dependsOn copyAssets
 dist.dependsOn compileKotlin2Js
+dist.dependsOn copyKotlinJSLib
 
 configurations {
     web
