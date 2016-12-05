@@ -14,8 +14,8 @@ dependencies {
     compile project(path: ':frontend', configuration: 'web')
     compile project(":rest")
 
-    compile "org.jetbrains.ktor:ktor-core:0.2.3"
-    compile "org.jetbrains.ktor:ktor-jetty:0.2.3"
+    compile "org.jetbrains.ktor:ktor-core:0.2.4"
+    compile "org.jetbrains.ktor:ktor-jetty:0.2.4"
 
     compile "org.jetbrains.squash:squash-core:0.2.1"
     compile "org.jetbrains.squash:squash-h2:0.2.1"

@@ -27,3 +27,6 @@ private val DB_DATE_RESPONSE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-ddZ")
 fun parseDBDate(str: String): LocalDate {
     return LocalDate.parse(str, DB_DATE_RESPONSE_FORMAT)
 }
+
+fun ClosedRange<LocalDate>.formatForDB() = start.plusDays(1).formatForDB() to
+        endInclusive.plusDays(1).formatForDB()

@@ -9,24 +9,36 @@ fun FlowContent.dashboard() {
         navbar()
     }
     div {
-        div("row") {
-            div("col s12 l6") {
+        row {
+            col(s = 12, l = 6) {
                 cardPanel {
-                    div(classes = "areaChart") { id = "kotlinCommitsVsAll" }
+                    div("areaChart") { id = "commits" }
                     postInit {
-                        Charts.mountDateAreaChart("/api/statistics/per_day/commits?days=7",
-                                "#kotlinCommitsVsAll",
+                        Charts.mountDateAreaChart("/api/statistics/per_day/commits",
+                                "#commits",
                                 arrayOf("All commits", "Kotlin commits"))
                     }
                 }
             }
-            div("col s12 l6") {
+            col(s = 12, l = 6) {
                 cardPanel {
-                    div(classes = "areaChart") { id = "kotlinAuthorsVsAll" }
+                    div("areaChart") { id = "commiters" }
                     postInit {
-                        Charts.mountDateAreaChart("/api/statistics/per_day/commiters?days=7",
-                                "#kotlinAuthorsVsAll",
+                        Charts.mountDateAreaChart("/api/statistics/per_day/commiters",
+                                "#commiters",
                                 arrayOf("All commiters", "Kotlin commiters"))
+                    }
+                }
+            }
+        }
+        div("row") {
+            col(s = 12, l = 6) {
+                cardPanel {
+                    div("areaChart") { id = "vcsRoots" }
+                    postInit {
+                        Charts.mountDateAreaChart("/api/statistics/per_day/vcsRoots",
+                                "#vcsRoots",
+                                arrayOf("All projects", "Projects using Kotlin"))
                     }
                 }
             }
