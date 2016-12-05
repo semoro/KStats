@@ -1,9 +1,9 @@
 package org.jetbrains.kstats.model
 
 import org.jetbrains.kstats.cron.withThreadLocalTransaction
-import org.jetbrains.kstats.cron.withTransaction
 import org.jetbrains.squash.definition.*
-import org.jetbrains.squash.expressions.*
+import org.jetbrains.squash.expressions.and
+import org.jetbrains.squash.expressions.eq
 import org.jetbrains.squash.query.orderBy
 import org.jetbrains.squash.query.select
 import org.jetbrains.squash.query.where
@@ -35,7 +35,7 @@ object ChangesCache : TableDefinition() {
 
 object TeamCityChangeRelation : TableDefinition() {
     val id = reference(ChangesCache.id)
-    val tcid = long("tcid").index() //TeamCity Change ID
+    val tcid = long("tcid").uniqueIndex() //TeamCity Change ID
     val commitVersion = varchar("version", 128).nullable()
     val vcsRootTcId = long("vcs_root_tcid").nullable().index()
 

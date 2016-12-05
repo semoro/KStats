@@ -30,9 +30,14 @@ class TeamCityCrawler(val client: REST) {
 
     val skippedChangeTypes = listOf("deleted", "moved")
 
+    val processedChangesSet = mutableSetOf<Long>()
+
     fun processShortChange(change: JsonElement) {
         processedChanges++
         val tcid = change["id"].long
+
+        if (tcid in processedChangesSet) return //No more non-unique tcid's
+
         val version = change["version"].string
 
         val duplicateCandidates = findChangeIDs(version)
