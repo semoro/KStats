@@ -1,15 +1,10 @@
 package org.jetbrains.kstats.query
 
 import org.jetbrains.kstats.cron.withTransaction
-import org.jetbrains.kstats.db
 import org.jetbrains.kstats.model.ChangesCache
 import org.jetbrains.kstats.model.TeamCityChangeRelation
-import org.jetbrains.ktor.routing.Route
-import org.jetbrains.squash.definition.Name
 import org.jetbrains.squash.results.get
 import java.time.LocalDate
-import java.time.OffsetTime
-import java.time.format.DateTimeFormatter
 
 
 object StatisticsPerDay {

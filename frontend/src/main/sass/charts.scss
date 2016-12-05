@@ -8,11 +8,31 @@ div.areaChart {
       fill: none;
       stroke: grey;
       stroke-width: 1;
-      shape-rendering: auto;
+      shape-rendering: crispEdges;
     }
 
     .axis.y .tick {
       stroke-opacity: 0.4;
+    }
+
+    .tooltip {
+      .box {
+        fill: white;
+      }
+      text {
+        fill: black;
+      }
+      circle {
+        fill: gray;
+        fill-opacity: 0.8;
+      }
+      line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: auto;
+        stroke-opacity: 0.4;
+      }
     }
   }
 }

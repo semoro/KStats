@@ -1,7 +1,8 @@
-package d3
+package bindings
 
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.DocumentFragment
+import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.EventTarget
@@ -227,7 +228,7 @@ object d3 {
         fun sort(comparator: ((a: Datum, b: Datum) -> Number)? = null): Selection<Datum>
         fun order(): Selection<Datum>
         fun on(type: String): (datum: Datum, index: Number, outerIndex: Number) -> Any
-        fun on(type: String, listener: (datum: Datum, index: Number, outerIndex: Number) -> Any, capture: Boolean? = null): Selection<Datum>
+        fun on(type: String, listener: Element.(datum: Datum, index: Number, outerIndex: Number) -> Any, capture: Boolean? = null): Selection<Datum>
         fun transition(name: String? = null): Transition<Datum>
         fun interrupt(name: String? = null): Selection<Datum>
         fun select(selector: String): Selection<Datum>
@@ -380,7 +381,7 @@ object d3 {
         var dy: Number
     }
     var event: dynamic /* Event | BaseEvent */ = noImpl
-    fun mouse(container: EventTarget): Pair<Number, Number> = noImpl
+    fun mouse(container: EventTarget): Array<Number> = noImpl
     fun touch(container: EventTarget, identifer: Number): Pair<Number, Number> = noImpl
     fun touch(container: EventTarget, touches: TouchList, identifer: Number): Pair<Number, Number> = noImpl
     fun touches(container: EventTarget, touches: TouchList? = null): Array<Pair<Number, Number>> = noImpl

@@ -32,7 +32,7 @@ fun init() {
     val element = document.create.div {
         dashboard()
     }
-    attachRoot.append(element)
+    attachRoot.appendChild(element)
     postInit()
 }
 
