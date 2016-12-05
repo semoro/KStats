@@ -29,13 +29,13 @@ object StatisticsPerDay {
             val (start, end) = range.formatForDB()
             val sql = """
                 SELECT
-                    FORMATDATETIME($date, 'yyyy-MM-ddZ') AS DATEM,
+                    FORMATDATETIME($date, 'yyyy-MM-ddZ') AS DATEF,
                     SUM($changed_files > 0),
                     SUM($kotlin_files > 0)
                 FROM $changesCache
                 WHERE $date > '$start' AND $date <= '$end'
-                GROUP BY DATEM
-                ORDER BY DATEM
+                GROUP BY DATEF
+                ORDER BY DATEF
             """.trimIndent()
 
             return@run executeStatement(sql).map {
@@ -51,23 +51,23 @@ object StatisticsPerDay {
             //TODO Add enough functional to Squash, to rewrite this expression with DSL
             val sql = """
                 SELECT
-                  DATUM,
+                  DATEF,
                   SUM(CHANGES_PER_AUTHOR.CHANGES > 0),
                   SUM(CHANGES_PER_AUTHOR.CHANGES_WITH_KOTLIN > 0)
                 FROM (SELECT
                         $author,
                         SUM($changed_files > 0) AS CHANGES,
                         SUM($kotlin_files > 0)  AS CHANGES_WITH_KOTLIN,
-                        FORMATDATETIME($date, 'yyyy-MM-ddZ') AS DATUM
+                        FORMATDATETIME($date, 'yyyy-MM-ddZ') AS DATEF
                       FROM $changesCache
                       WHERE
                         $author IS NOT NULL
                         AND $date > '$start'
                         AND $date <= '$end'
-                      GROUP BY $author, DATUM
+                      GROUP BY $author, DATEF
                      ) AS CHANGES_PER_AUTHOR
-                GROUP BY DATUM
-                ORDER BY DATUM
+                GROUP BY DATEF
+                ORDER BY DATEF
             """.trimIndent()
 
             return@run executeStatement(sql).map {
@@ -81,23 +81,23 @@ object StatisticsPerDay {
             val (start, end) = range.formatForDB()
             val sql = """
                 SELECT
-                  DATUM,
+                  DATEF,
                   SUM(CHANGES_PER_AUTHOR.CHANGES > 0),
                   SUM(CHANGES_PER_AUTHOR.CHANGES_WITH_KOTLIN > 0)
                 FROM (SELECT
                         SUM($changed_files > 0)  AS CHANGES,
                         SUM($kotlin_files > 0)   AS CHANGES_WITH_KOTLIN,
-                        FORMATDATETIME("date", 'yyyy-MM-ddZ') AS DATUM
-                      FROM CHANGESCACHE
+                        FORMATDATETIME("date", 'yyyy-MM-ddZ') AS DATEF
+                      FROM $changesCache
                         JOIN ${TeamCityChangeRelation.toSQL()} ON ${ChangesCache.id.toSQL()} = ${TeamCityChangeRelation.id.toSQL()}
                       WHERE
                         $vcs_root_tcid IS NOT NULL
                         AND $date > '$start'
                         AND $date <= '$end'
-                      GROUP BY $vcs_root_tcid, DATUM
+                      GROUP BY $vcs_root_tcid, DATEF
                      ) AS CHANGES_PER_AUTHOR
-                GROUP BY DATUM
-                ORDER BY DATUM
+                GROUP BY DATEF
+                ORDER BY DATEF
             """.trimIndent()
 
             return@run executeStatement(sql).map {

@@ -68,7 +68,7 @@ object TeamCityChangeRelation : TableDefinition() {
     }
 
     fun findLatestChangeTCID() = withThreadLocalTransaction {
-        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid) ?: 7530000
+        TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().first()[tcid]
     }
 }
 
