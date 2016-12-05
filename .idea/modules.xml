@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/kstats.iml" filepath="$PROJECT_DIR$/.idea/modules/kstats.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rest/rest.iml" filepath="$PROJECT_DIR$/.idea/modules/rest/rest.iml" group="rest" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/rest/rest_main.iml" filepath="$PROJECT_DIR$/.idea/modules/rest/rest_main.iml" group="rest" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rest/rest_test.iml" filepath="$PROJECT_DIR$/.idea/modules/rest/rest_test.iml" group="rest" />
     </modules>
   </component>
 </project>

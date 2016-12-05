@@ -24,6 +24,7 @@ hs_err_pid*
 .idea/shelf
 
 # Sensitive or high-churn files:
+.idea/dataSources
 .idea/dataSources.ids
 .idea/dataSources.xml
 .idea/dataSources.local.xml
@@ -40,6 +41,7 @@ hs_err_pid*
 
 ## File-based project format:
 *.iws
+*.iml
 
 ## Plugin-specific files:
 
