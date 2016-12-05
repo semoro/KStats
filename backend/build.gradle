@@ -11,7 +11,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile project(path: ':frontend', configuration: 'web')
+    runtime project(path: ':frontend', configuration: 'web')
     compile project(":rest")
 
     compile "org.jetbrains.ktor:ktor-core:0.2.4"

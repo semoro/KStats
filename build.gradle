@@ -1,5 +1,5 @@
 group 'org.jetbrains.kstats'
-version '1.0-SNAPSHOT'
+version '0.0.1'
 
 allprojects {
     buildscript {
@@ -27,6 +27,6 @@ allprojects {
     }
 }
 
-task wrapper {
-    version = "3.2"
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2.1'
 }
