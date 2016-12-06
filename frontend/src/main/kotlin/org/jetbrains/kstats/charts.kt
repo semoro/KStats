@@ -205,7 +205,7 @@ object Charts {
 
             val tooltip = svg.append("g")
                     .attr("class", "tooltip x")
-                    .style("display", "none")
+                    .attr("visibility", "hidden")
 
             tooltip.append("line")
                     .attr("x2", 0)
@@ -269,13 +269,14 @@ object Charts {
                     .attr("style", "fill: none;")
                     .attr("pointer-events", "all")
                     .on("mouseover", { _, _, _ ->
-                        tooltip.style("display", "")
+                        tooltip.interrupt()
+                        tooltip.attr("visibility", "visible")
                     })
                     .on("mouseout", { _, _, _ ->
                         currentPoint = null
                         tooltip.transition()
                                 .delay(250)
-                                .style("display", "none")
+                                .attr("visibility", "hidden")
                     })
                     .on("mousemove", { d, _, _ ->
                         val (xPos) = d3.mouse(this)
@@ -287,13 +288,15 @@ object Charts {
                         }.minBy { Math.abs(it.x - xPos.toDouble()) }!!
 
                         if (currentPoint != point) {
-                            currentPoint = point
-                            tooltip.transition()
-                                    .duration(500)
+                            tooltip.transition().duration(500)
                                     .attr("transform", "translate(${point.x},0)")
 
-                            tooltipPointAll.attr("cy", point.y1)
-                            tooltipPointKotlin.attr("cy", point.y2)
+                            currentPoint = point
+
+                            tooltipPointAll.transition().duration(500)
+                                    .attr("cy", point.y1)
+                            tooltipPointKotlin.transition().duration(500)
+                                    .attr("cy", point.y2)
 
                             val top = 0.0 to point.y1
                             val middle = point.y1 to point.y2
