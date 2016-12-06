@@ -250,7 +250,7 @@ object Charts {
 
             tooltipEntries.append("text")
                     .attr("x", legendRectSize * 2)
-                    .attr("y", legendRectSize)
+                    .attr("y", legendRectSize + 0.5)
 
             tooltipEntries.append("rect")
                     .attr("width", legendRectSize)
@@ -259,6 +259,7 @@ object Charts {
                         "url($d)"
                     })
 
+            var currentPoint: ChartPoint? = null
 
             svg.append("rect")
                     .datum(data)
@@ -271,7 +272,10 @@ object Charts {
                         tooltip.style("display", "")
                     })
                     .on("mouseout", { _, _, _ ->
-                        tooltip.style("display", "none")
+                        currentPoint = null
+                        tooltip.transition()
+                                .delay(250)
+                                .style("display", "none")
                     })
                     .on("mousemove", { d, _, _ ->
                         val (xPos) = d3.mouse(this)
@@ -282,33 +286,42 @@ object Charts {
                                     y(it.kotlin).toDouble())
                         }.minBy { Math.abs(it.x - xPos.toDouble()) }!!
 
-                        tooltip.attr("transform", "translate(${point.x},0)")
+                        if (currentPoint != point) {
+                            currentPoint = point
+                            tooltip.transition()
+                                    .duration(500)
+                                    .attr("transform", "translate(${point.x},0)")
 
-                        tooltipPointAll.attr("cy", point.y1)
-                        tooltipPointKotlin.attr("cy", point.y2)
+                            tooltipPointAll.attr("cy", point.y1)
+                            tooltipPointKotlin.attr("cy", point.y2)
 
-                        val top = 0.0 to point.y1
-                        val middle = point.y1 to point.y2
-                        val bottom = point.y2 to h.toDouble()
+                            val top = 0.0 to point.y1
+                            val middle = point.y1 to point.y2
+                            val bottom = point.y2 to h.toDouble()
 
-                        val placeLocation = listOf(top, middle, bottom)
-                                .maxBy { Math.abs(it.second - it.first) }
+                            val placeLocation = listOf(top, middle, bottom)
+                                    .maxBy { Math.abs(it.second - it.first) }
 
-                        val yPlace = when (placeLocation) {
-                            top -> placeLocation.second - tooltipHeight - tooltipMargin
-                            middle -> placeLocation.first + tooltipMargin
-                            bottom -> tooltipMargin
-                            else -> 0.0
+                            val yPlace = when (placeLocation) {
+                                top -> placeLocation.second - tooltipHeight - tooltipMargin
+                                middle -> placeLocation.first + tooltipMargin
+                                bottom -> tooltipMargin
+                                else -> 0.0
+                            }
+
+
+                            tooltipY.transition()
+                                    .duration(500)
+                                    .attr("transform", "translate(0, $yPlace)")
+                            val percent = Math.round(point.original.kotlin.toDouble() / point.original.all.toDouble() * 100.0)
+                            tooltipBoxGroup.selectAll("text")
+                                    .data(arrayOf(point.original.all,
+                                            point.original.kotlin,
+                                            "$percent%"))
+                                    .transition()
+                                    .delay(250)
+                                    .text { text, _, _ -> text }
                         }
-
-                        tooltipY.attr("transform", "translate(0, $yPlace)")
-                        val percent = Math.round(point.original.kotlin.toDouble() / point.original.all.toDouble() * 100.0)
-                        tooltipBoxGroup.selectAll("text")
-                                .data(arrayOf(point.original.all,
-                                        point.original.kotlin,
-                                        "$percent%"))
-                                .text { text, _, _ -> text }
-
                     })
         })
     }
