@@ -11,7 +11,7 @@ import org.jetbrains.kstats.rest.REST
 import java.time.LocalDateTime
 import kotlin.system.measureTimeMillis
 
-class TeamCityCrawler(val client: REST) {
+class TeamCityCrawler(val client: REST, val startTCID: Long) {
 
     var processedChanges = 0
     var uniqueChanges = 0
@@ -90,7 +90,7 @@ class TeamCityCrawler(val client: REST) {
     }
 
     fun queryChanges() {
-        processChanges(client.changesSinceChange(findLatestChangeTCID()))
+        processChanges(client.changesSinceChange(startTCID))
     }
 }
 

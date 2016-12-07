@@ -3,6 +3,7 @@ package org.jetbrains.kstats.cron
 
 import org.jetbrains.kstats.Config.teamcity
 import org.jetbrains.kstats.config
+import org.jetbrains.kstats.model.TeamCityChangeRelation
 import org.jetbrains.kstats.rest.REST
 import java.io.File
 import java.util.concurrent.Executors
@@ -38,7 +39,9 @@ object Cron {
     fun collectChanges() {
         auth()
         println("Collecting changes")
-        val crawler = TeamCityCrawler(rest)
+
+        val startTCID = TeamCityChangeRelation.findLatestChangeTCID() ?: config[teamcity.start_tcid]
+        val crawler = TeamCityCrawler(rest, startTCID)
         crawler.doWork()
     }
 }

@@ -23,10 +23,12 @@ object Config {
         val user by stringType
         val password by stringType
         val additional_certificates by stringType
+        val start_tcid by longType
     }
 
     object server : PropertyGroup() {
         val host by stringType
         val port by intType
     }
+
 }
