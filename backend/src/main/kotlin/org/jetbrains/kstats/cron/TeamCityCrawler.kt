@@ -2,7 +2,6 @@ package org.jetbrains.kstats.cron
 
 import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
-import mu.KotlinLogging
 import mu.KotlinLogging.logger
 import org.jetbrains.kstats.model.*
 import org.jetbrains.kstats.model.TeamCityChangeRelation.findChangeID
@@ -39,6 +38,7 @@ class TeamCityCrawler(val client: REST, val startTCID: Long) {
         val tcid = change["id"].long
 
         if (tcid in processedChangesSet) return //No more non-unique tcid's
+        processedChangesSet += tcid
 
         val version = change["version"].string
 

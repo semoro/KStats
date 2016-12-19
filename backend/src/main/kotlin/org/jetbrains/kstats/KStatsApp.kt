@@ -95,7 +95,7 @@ fun Route.api() {
     }
 }
 
-val db = H2Connection.create("jdbc:h2:file:./db")
+val db = H2Connection.create("jdbc:h2:file:./data/db")
 
 
 class KStatsApp : AutoCloseable {

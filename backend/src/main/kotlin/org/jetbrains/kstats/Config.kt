@@ -7,13 +7,13 @@ import java.io.File
 
 fun optionalFile(f: File): Configuration =
         if (f.exists())
-            ConfigurationProperties.fromFile(File("kstats.properties"))
+            ConfigurationProperties.fromFile(f)
         else
             ConfigurationMap() //Empty config
 
 val config = systemProperties() overriding
         EnvironmentVariables() overriding
-        optionalFile(File("kstats.properties")) overriding
+        optionalFile(File("data/kstats.properties")) overriding
         ConfigurationProperties.fromResource("default.properties")
 
 object Config {
