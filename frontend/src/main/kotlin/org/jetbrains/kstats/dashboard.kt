@@ -57,11 +57,6 @@ fun FlowContent.navbar() {
                         img { src = "/img/logo.png" }
                         +"Internal Usage Statistics"
                     }
-                    ul(classes = "right hide-on-med-and-down") {
-                        li {
-                            materialIcon("settings")
-                        }
-                    }
                 }
             }
         }

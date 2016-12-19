@@ -1,6 +1,7 @@
 package org.jetbrains.kstats.cron
 
 
+import mu.KotlinLogging.logger
 import org.jetbrains.kstats.Config.teamcity
 import org.jetbrains.kstats.config
 import org.jetbrains.kstats.model.TeamCityChangeRelation
@@ -14,6 +15,7 @@ object Cron {
     val executor = Executors.newSingleThreadScheduledExecutor()
     lateinit var rest: REST
     lateinit var defaultTask: ScheduledFuture<*>
+    val log = logger("Cron")
 
     fun auth() {
         if (config[teamcity.guest])
@@ -23,6 +25,7 @@ object Cron {
     }
 
     fun start() {
+        log.info("Starting")
         //db.monitor.after { sqlStatement, any -> println(sqlStatement) }
         val certificates = config.getOrElse(teamcity.additional_certificates, "").split(":").filterNot(String::isBlank).map(::File)
         rest = REST(config[teamcity.url], certificates)
@@ -38,7 +41,7 @@ object Cron {
 
     fun collectChanges() {
         auth()
-        println("Collecting changes")
+        log.info("Collecting changes")
 
         val startTCID = TeamCityChangeRelation.findLatestChangeTCID() ?: config[teamcity.start_tcid]
         val crawler = TeamCityCrawler(rest, startTCID)

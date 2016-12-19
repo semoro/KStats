@@ -21,6 +21,8 @@ dependencies {
     compile "org.jetbrains.squash:squash-h2:0.2.1"
 
     compile "com.natpryce:konfig:1.4.2.0"
+
+    compile 'io.github.microutils:kotlin-logging:1.4.1'
 }
 
 

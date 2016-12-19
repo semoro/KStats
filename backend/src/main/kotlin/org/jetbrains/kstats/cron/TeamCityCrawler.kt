@@ -2,29 +2,31 @@ package org.jetbrains.kstats.cron
 
 import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
+import mu.KotlinLogging
+import mu.KotlinLogging.logger
 import org.jetbrains.kstats.model.*
 import org.jetbrains.kstats.model.TeamCityChangeRelation.findChangeID
 import org.jetbrains.kstats.model.TeamCityChangeRelation.findChangeIDs
-import org.jetbrains.kstats.model.TeamCityChangeRelation.findLatestChangeTCID
-
 import org.jetbrains.kstats.rest.REST
 import java.time.LocalDateTime
 import kotlin.system.measureTimeMillis
 
 class TeamCityCrawler(val client: REST, val startTCID: Long) {
 
+    val log = logger("TeamCityCrawler")
+
     var processedChanges = 0
     var uniqueChanges = 0
     fun doWork() {
         try {
-            println("TeamCity crawler started")
+            log.info("TeamCity crawler started")
             val time = measureTimeMillis {
                 queryChanges()
             }
-            println("TeamCity crawler processed $processedChanges changes, $uniqueChanges unique changes in ${time / 1000}s")
+            log.info("TeamCity crawler processed $processedChanges changes, $uniqueChanges unique changes in ${time / 1000}s")
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            log.warn("Exception while processing changes", e)
         }
     }
 
@@ -47,7 +49,7 @@ class TeamCityCrawler(val client: REST, val startTCID: Long) {
         }
 
         val detailedChange = client.detailedChangeById(tcid).obj
-        println(detailedChange)
+        log.debug(detailedChange.toString())
         val vcsId = detailedChange["vcsRootInstance"]["id"].long
         if (duplicateCandidates.isNotEmpty()) {
             findChangeID(version, vcsId)?.let { duplicate ->
@@ -83,14 +85,16 @@ class TeamCityCrawler(val client: REST, val startTCID: Long) {
             changes.forEach(this@TeamCityCrawler::processShortChange)
             commit()
         }
-
-        changesResponse.obj.get("nextHref").nullString?.let {
-            processChanges(client.nextHref(it))
-        }
     }
 
     fun queryChanges() {
-        processChanges(client.changesSinceChange(startTCID))
+        var changesResponse: JsonElement? = client.changesSinceChange(startTCID)
+        do {
+            processChanges(changesResponse!!)
+            changesResponse = changesResponse.obj.get("nextHref").nullString?.let {
+                client.nextHref(it)
+            }
+        } while (changesResponse != null)
     }
 }
 
