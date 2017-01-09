@@ -81,7 +81,7 @@ class TeamCityCrawler(val client: REST, val startTCID: Long) {
             return
         }
 
-        withThreadLocalTransaction {
+        withTransaction {
             changes.forEach(this@TeamCityCrawler::processShortChange)
             commit()
         }

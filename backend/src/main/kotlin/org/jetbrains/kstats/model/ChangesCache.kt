@@ -1,6 +1,6 @@
 package org.jetbrains.kstats.model
 
-import org.jetbrains.kstats.cron.withThreadLocalTransaction
+import org.jetbrains.kstats.cron.withTransaction
 import org.jetbrains.squash.definition.*
 import org.jetbrains.squash.expressions.and
 import org.jetbrains.squash.expressions.eq
@@ -22,7 +22,7 @@ object ChangesCache : TableDefinition() {
     val files = integer("changed_files")
     val kotlinFiles = integer("kotlin_files")
 
-    fun create(change: ChangeDTO) = withThreadLocalTransaction {
+    fun create(change: ChangeDTO) = withTransaction {
         change.id = insertInto(ChangesCache).values {
             it[date] = change.date
             it[author] = change.author?.id
@@ -39,7 +39,7 @@ object TeamCityChangeRelation : TableDefinition() {
     val commitVersion = varchar("version", 128).nullable()
     val vcsRootTcId = long("vcs_root_tcid").nullable().index()
 
-    fun addUniqueChange(_id: Int, _tcid: Long, _commitVersion: String, _vcsRootTcId: Long) = withThreadLocalTransaction {
+    fun addUniqueChange(_id: Int, _tcid: Long, _commitVersion: String, _vcsRootTcId: Long) = withTransaction {
         insertInto(TeamCityChangeRelation).values {
             it[id] = _id
             it[tcid] = _tcid
@@ -48,26 +48,26 @@ object TeamCityChangeRelation : TableDefinition() {
         }.execute()
     }
 
-    fun addRelation(_id: Int, _tcid: Long) = withThreadLocalTransaction {
+    fun addRelation(_id: Int, _tcid: Long) = withTransaction {
         insertInto(TeamCityChangeRelation).values {
             it[id] = _id
             it[tcid] = _tcid
         }.execute()
     }
 
-    fun findChangeIDs(_commitVersion: String) = withThreadLocalTransaction {
-        return@withThreadLocalTransaction select { id }.where {
+    fun findChangeIDs(_commitVersion: String) = withTransaction {
+        return@withTransaction select { id }.where {
             commitVersion eq _commitVersion
         }.execute().map { it[id] }.toList()
     }
 
-    fun findChangeID(_commitVersion: String, _vcsRootTcId: Long) = withThreadLocalTransaction {
-        return@withThreadLocalTransaction select { id }.where {
+    fun findChangeID(_commitVersion: String, _vcsRootTcId: Long) = withTransaction {
+        return@withTransaction select { id }.where {
             commitVersion eq _commitVersion and (vcsRootTcId eq _vcsRootTcId)
         }.execute().singleOrNull()?.get(id)
     }
 
-    fun findLatestChangeTCID() = withThreadLocalTransaction {
+    fun findLatestChangeTCID() = withTransaction {
         TeamCityChangeRelation.select { tcid }.orderBy(ascending = false) { tcid }.execute().firstOrNull()?.get(tcid)
     }
 }

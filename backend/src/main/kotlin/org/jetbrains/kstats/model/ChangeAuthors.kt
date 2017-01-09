@@ -1,6 +1,6 @@
 package org.jetbrains.kstats.model
 
-import org.jetbrains.kstats.cron.withThreadLocalTransaction
+import org.jetbrains.kstats.cron.withTransaction
 import org.jetbrains.kstats.model.TeamCityAuthorRelation.addRelation
 import org.jetbrains.kstats.model.TeamCityAuthorRelation.findIdByTCID
 import org.jetbrains.squash.definition.*
@@ -17,14 +17,14 @@ object ChangeAuthors : TableDefinition() {
     val displayName = text("display_name")
     val username = text("username")
 
-    fun create(dto: AuthorDTO) = withThreadLocalTransaction {
+    fun create(dto: AuthorDTO) = withTransaction {
         dto.id = insertInto(ChangeAuthors).values {
             it[displayName] = dto.displayName
             it[username] = dto.username
         }.fetch(id).execute()
     }
 
-    fun createIfNotExist(dto: AuthorDTO, _tcid: Long) = withThreadLocalTransaction {
+    fun createIfNotExist(dto: AuthorDTO, _tcid: Long) = withTransaction {
         findIdByTCID(_tcid)?.let {
             dto.id = it
         } ?: create(dto).apply {
@@ -41,11 +41,11 @@ object TeamCityAuthorRelation : TableDefinition() {
         primaryKey(id, tcid)
     }
 
-    fun findIdByTCID(_tcid: Long) = withThreadLocalTransaction {
-        return@withThreadLocalTransaction select { id }.where { tcid eq _tcid }.execute().singleOrNull()?.let { it[id] }
+    fun findIdByTCID(_tcid: Long) = withTransaction {
+        return@withTransaction select { id }.where { tcid eq _tcid }.execute().singleOrNull()?.let { it[id] }
     }
 
-    fun addRelation(_id: Int, _tcid: Long) = withThreadLocalTransaction {
+    fun addRelation(_id: Int, _tcid: Long) = withTransaction {
         insertInto(TeamCityAuthorRelation).values {
             it[id] = _id
             it[tcid] = _tcid

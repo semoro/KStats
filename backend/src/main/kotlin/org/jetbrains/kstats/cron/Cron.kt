@@ -32,6 +32,12 @@ object Cron {
         auth()
 
         defaultTask = executor.scheduleWithFixedDelay(this::collectChanges, 0, 1, TimeUnit.MINUTES)
+
+        executor.scheduleWithFixedDelay({
+            withTransaction {
+                executeStatement("SHUTDOWN COMPACT")
+            }
+        }, 5, 5, TimeUnit.MINUTES)
     }
 
     fun stop() {
