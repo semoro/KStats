@@ -98,11 +98,7 @@ fun Route.api() {
 val db = H2Connection.create("jdbc:h2:file:./data/db")
 
 
-class KStatsApp : AutoCloseable {
-    override fun close() {
-        Cron.stop()
-        db.close()
-    }
+class KStatsApp {
 
     fun Application.install() {
         DBInitializer.initializeDataBase()

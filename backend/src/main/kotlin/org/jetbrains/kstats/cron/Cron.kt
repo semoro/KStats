@@ -10,6 +10,7 @@ import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 object Cron {
     val executor = Executors.newSingleThreadScheduledExecutor()
@@ -37,13 +38,14 @@ object Cron {
 
         defaultTask = executor.scheduleWithFixedDelay(this::collectChanges, 0, 1, TimeUnit.MINUTES)
 
+
+        Runtime.getRuntime().addShutdownHook(thread(start = false, block = this::stop))
     }
 
     fun stop() {
         additionalTasks.forEach { it.cancel(false) }
         defaultTask.cancel(true)
         executor.shutdownNow()
-        compactDatabase(false)
     }
 
     fun collectChanges() {

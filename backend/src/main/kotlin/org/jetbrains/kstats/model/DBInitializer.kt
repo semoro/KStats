@@ -1,6 +1,8 @@
 package org.jetbrains.kstats.model
 
 import org.jetbrains.kstats.cron.withTransaction
+import org.jetbrains.kstats.db
+import kotlin.concurrent.thread
 
 
 object DBInitializer {
@@ -11,6 +13,8 @@ object DBInitializer {
             databaseSchema().create(tables)
             commit()
         }
+
+        Runtime.getRuntime().addShutdownHook(thread(start = false, block = db::close))
     }
 }
 
