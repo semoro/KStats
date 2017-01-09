@@ -49,7 +49,7 @@ class TeamCityCrawler(val client: REST, val startTCID: Long) {
         }
 
         val detailedChange = client.detailedChangeById(tcid).obj
-        log.debug(detailedChange.toString())
+        log.trace(detailedChange.toString())
         val vcsId = detailedChange["vcsRootInstance"]["id"].long
         if (duplicateCandidates.isNotEmpty()) {
             findChangeID(version, vcsId)?.let { duplicate ->

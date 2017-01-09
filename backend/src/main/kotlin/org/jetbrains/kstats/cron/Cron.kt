@@ -15,6 +15,8 @@ object Cron {
     val executor = Executors.newSingleThreadScheduledExecutor()
     lateinit var rest: REST
     lateinit var defaultTask: ScheduledFuture<*>
+    var additionalTasks = mutableListOf<ScheduledFuture<*>>()
+
     val log = logger("Cron")
 
     fun auth() {
@@ -26,23 +28,22 @@ object Cron {
 
     fun start() {
         log.info("Starting")
-        //db.monitor.after { sqlStatement, any -> println(sqlStatement) }
         val certificates = config.getOrElse(teamcity.additional_certificates, "").split(":").filterNot(String::isBlank).map(::File)
         rest = REST(config[teamcity.url], certificates)
         auth()
 
+        additionalTasks.add(executor.scheduleWithFixedDelay({ compactDatabase(false) }, 0, 35, TimeUnit.MINUTES))
+        additionalTasks.add(executor.scheduleWithFixedDelay({ compactDatabase(true) }, 1, 2, TimeUnit.HOURS))
+
         defaultTask = executor.scheduleWithFixedDelay(this::collectChanges, 0, 1, TimeUnit.MINUTES)
 
-        executor.scheduleWithFixedDelay({
-            withTransaction {
-                executeStatement("SHUTDOWN COMPACT")
-            }
-        }, 5, 5, TimeUnit.MINUTES)
     }
 
     fun stop() {
+        additionalTasks.forEach { it.cancel(false) }
         defaultTask.cancel(true)
         executor.shutdownNow()
+        compactDatabase(false)
     }
 
     fun collectChanges() {
@@ -52,5 +53,13 @@ object Cron {
         val startTCID = TeamCityChangeRelation.findLatestChangeTCID() ?: config[teamcity.start_tcid]
         val crawler = TeamCityCrawler(rest, startTCID)
         crawler.doWork()
+    }
+
+    fun compactDatabase(defrag: Boolean) {
+        val action = if (defrag) "DEFRAG" else "COMPACT"
+        log.debug { "Compacting database, action: $action" }
+        withTransaction {
+            executeStatement("SHUTDOWN $action")
+        }
     }
 }

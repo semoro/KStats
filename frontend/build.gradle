@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-js-library:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx.html.js:latest-1.1.0-dev-4795-104'
+    compile 'org.jetbrains.kotlinx:kotlinx.html.js:bootstrap-1.1.0-dev-5173-8'
 }
 
 compileKotlin2Js {
